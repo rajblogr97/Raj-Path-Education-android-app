@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raj Path – A-to-Z Career Builder & Learning Platform</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Raj Path is an all-in-one career education & skill development app for tech and non-tech courses. Get a personalized career roadmap, certified courses, and job-ready skills in India." />
+    <meta name="keywords" content="career builder app, tech courses, non-tech education, skill development, Raj Path, online learning India, job-ready skills" />
+    <meta name="author" content="Raj Path" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rajpath.com/" />
+    <meta property="og:title" content="Raj Path – A-to-Z Career Builder & Learning Platform" />
+    <meta property="og:description" content="Empowering youth across India to build skills and achieve dreams with personalized career guidance and A-Z learning resources." />
+    <meta property="og:image" content="https://picsum.photos/1200/630" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://rajpath.com/" />
+    <meta property="twitter:title" content="Raj Path – A-to-Z Career Builder & Learning Platform" />
+    <meta property="twitter:description" content="Empowering youth across India to build skills and achieve dreams with personalized career guidance and A-Z learning resources." />
+    <meta property="twitter:image" content="https://picsum.photos/1200/630" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'royal-blue': '#1a3a7d',
+              'gold-accent': '#f0b90b',
+            },
+            keyframes: {
+              'pop-and-fade': {
+                '0%': { transform: 'scale(0.5)', opacity: '0' },
+                '50%': { transform: 'scale(1.1)', opacity: '1' },
+                '70%': { transform: 'scale(1)', opacity: '1' },
+                '100%': { transform: 'scale(1)', opacity: '0' },
+              },
+              'toast-in': {
+                '0%': { transform: 'translateY(100%)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              'toast-out': {
+                '0%': { transform: 'translateY(0)', opacity: '1' },
+                '100%': { transform: 'translateY(100%)', opacity: '0' },
+              },
+            },
+            animation: {
+              'pop-and-fade': 'pop-and-fade 1s ease-out forwards',
+              'toast-in': 'toast-in 0.5s ease-out forwards',
+              'toast-out': 'toast-out 0.5s ease-in forwards',
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^6.25.1",
+    "react-router": "https://aistudiocdn.com/react-router@^6.25.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
