@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { DashboardIcon, CoursesIcon, LeftArrowIcon, RightArrowIcon, AnalyticsIcon, DocumentSearchIcon } from './IconComponents';
+import { DashboardIcon, CoursesIcon, LeftArrowIcon, RightArrowIcon, AnalyticsIcon, DocumentSearchIcon, CloudIcon } from './IconComponents';
 import { useAuth } from '../context/AuthContext';
 
 interface SidebarProps {
@@ -27,14 +27,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const { user } = useAuth();
 
   const getNavItems = () => {
+    const hostingGuideItem = { to: "/hosting", icon: <CloudIcon className="w-6 h-6" />, label: 'Hosting Guide' };
+    
     switch(user?.role) {
       case 'Admin':
         return [
            { to: "/analytics", icon: <AnalyticsIcon className="w-6 h-6" />, label: 'Admin Analytics' },
+           hostingGuideItem,
         ];
       case 'Instructor':
         return [
            { to: "/instructor-dashboard", icon: <DashboardIcon className="w-6 h-6" />, label: 'Instructor Dashboard' },
+           hostingGuideItem,
         ];
       case 'Student':
       default:
@@ -42,6 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             { to: "/", icon: <DashboardIcon className="w-6 h-6" />, label: 'Dashboard' },
             { to: "/my-courses", icon: <CoursesIcon className="w-6 h-6" />, label: 'My Courses' },
             { to: "/ats-checker", icon: <DocumentSearchIcon className="w-6 h-6" />, label: 'ATS Resume Checker' },
+            hostingGuideItem,
         ];
     }
   }

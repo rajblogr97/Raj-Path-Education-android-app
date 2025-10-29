@@ -25,6 +25,7 @@ import CertificatePage from './pages/CertificatePage';
 import InstructorsPage from './pages/InstructorsPage';
 import ATSCheckerPage from './pages/ATSCheckerPage';
 import SuccessSharePage from './pages/SuccessSharePage';
+import HostingPage from './pages/HostingPage';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -178,6 +179,12 @@ const App: React.FC = () => {
             <Route path="/share/:courseId" element={
               <ProtectedRoute allowedRoles={['Student', 'Instructor', 'Admin']}>
                 <SuccessSharePage allCourses={allCourses} />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/hosting" element={
+              <ProtectedRoute allowedRoles={['Student', 'Instructor', 'Admin']}>
+                <HostingPage />
               </ProtectedRoute>
             } />
 
