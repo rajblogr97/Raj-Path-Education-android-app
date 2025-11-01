@@ -1,15 +1,15 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { RoadmapStep, Opportunity, Citation, TTSVoice, AnalyticsData, ATSAnalysisResult, GeneratedQuiz } from '../types';
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  // This is a fallback for development if the env var isn't set.
-  // In a real production environment, this should throw an error or be handled securely.
-  console.warn("API_KEY is not set. Please set the environment variable.");
+// Fix: Use `process.env.API_KEY` as per coding guidelines, which resolves the TypeScript error.
+// The API key must be obtained exclusively from this environment variable.
+if (!process.env.API_KEY) {
+    // This provides a clear error if the environment variable is not set.
+    throw new Error("API_KEY environment variable not set. Please ensure it is configured in your environment.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
 
 const roadmapSchema = {
   type: Type.ARRAY,
