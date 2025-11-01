@@ -24,7 +24,7 @@ const SignupPage: React.FC = () => {
     <div className="flex items-center justify-center min-h-full">
       <Card className="w-full max-w-md p-8">
         <h2 className="text-3xl font-bold text-center text-royal-blue mb-2">Create Your Account</h2>
-        <p className="text-center text-gray-600 mb-6">Start your journey with Raj Path today!</p>
+        <p className="text-center text-gray-600 mb-6">Start your journey with Saumya Path today!</p>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

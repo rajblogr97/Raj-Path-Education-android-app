@@ -1,9 +1,9 @@
 import { Course, AnalyticsData, User, Instructor, DetailedCourseStat } from './types';
 
 export const MOCK_USERS: User[] = [
-  { id: 1, name: 'Raj Kumar', email: 'student@rajpath.com', role: 'Student', joinDate: '2023-01-15', enrolledCourses: 2 },
-  { id: 2, name: 'Dr. Evelyn Reed', email: 'instructor@rajpath.com', role: 'Instructor', joinDate: '2022-11-20', enrolledCourses: 0 },
-  { id: 3, name: 'Admin User', email: 'admin@rajpath.com', role: 'Admin', joinDate: '2022-10-01', enrolledCourses: 0 },
+  { id: 1, name: 'Raj Kumar', email: 'student@saumyapath.com', role: 'Student', joinDate: '2023-01-15', enrolledCourses: 2 },
+  { id: 2, name: 'Dr. Evelyn Reed', email: 'instructor@saumyapath.com', role: 'Instructor', joinDate: '2022-11-20', enrolledCourses: 0 },
+  { id: 3, name: 'Admin User', email: 'admin@saumyapath.com', role: 'Admin', joinDate: '2022-10-01', enrolledCourses: 0 },
   { id: 4, name: 'Priya Sharma', email: 'priya.sharma@example.com', role: 'Student', joinDate: '2023-03-22', enrolledCourses: 1 },
   { id: 5, name: 'Amit Singh', email: 'amit.singh@example.com', role: 'Student', joinDate: '2023-08-10', enrolledCourses: 3 },
   { id: 6, name: 'Sunita Reddy', email: 'sunita.reddy@example.com', role: 'Student', joinDate: '2023-09-05', enrolledCourses: 1 },
@@ -26,10 +26,10 @@ export const INSTRUCTORS: Instructor[] = [
   },
   {
     id: 3,
-    name: 'Raj Meena',
+    name: 'Saumya Meena',
     title: 'Founder & CEO, Lead Skill Development Coach',
     avatarUrl: 'https://picsum.photos/seed/raj/200',
-    bio: 'Raj is a visionary entrepreneur dedicated to democratizing education in India. With a background in both tech and business, he specializes in holistic skill development, career coaching, and helping learners unlock their full potential.'
+    bio: 'Saumya is a visionary entrepreneur dedicated to democratizing education in India. With a background in both tech and business, she specializes in holistic skill development, career coaching, and helping learners unlock their full potential.'
   },
   {
     id: 4,
@@ -173,7 +173,7 @@ export const FEATURED_COURSES: Course[] = [
     imageUrl: 'https://picsum.photos/seed/bundle/400/200',
     type: 'Premium',
     price: '₹14,999',
-    instructor: 'Raj Meena',
+    instructor: 'Saumya Meena',
     enrollments: 5000,
     language: 'Bilingual',
     duration: '6 Months',
@@ -310,7 +310,7 @@ export const HIRING_PARTNERS = [
 
 export const TESTIMONIALS = [
     {
-        quote: "I was completely lost about my career path. The AI Roadmap feature gave me a clear, step-by-step plan. Raj Path didn't just teach me to code; it taught me how to think like an engineer.",
+        quote: "I was completely lost about my career path. The AI Roadmap feature gave me a clear, step-by-step plan. Saumya Path didn't just teach me to code; it taught me how to think like an engineer.",
         name: "Priya Sharma",
         course: "Full Stack Development",
         avatarUrl: "https://picsum.photos/seed/priya/100"
@@ -322,7 +322,7 @@ export const TESTIMONIALS = [
         avatarUrl: "https://picsum.photos/seed/amit/100"
     },
     {
-        quote: "Raj Path's placement assistance is top-notch. From resume building to mock interviews with industry experts, they prepared me for everything. I landed a great HR role at a top startup!",
+        quote: "Saumya Path's placement assistance is top-notch. From resume building to mock interviews with industry experts, they prepared me for everything. I landed a great HR role at a top startup!",
         name: "Sunita Reddy",
         course: "Modern HR Management",
         avatarUrl: "https://picsum.photos/seed/sunita/100"

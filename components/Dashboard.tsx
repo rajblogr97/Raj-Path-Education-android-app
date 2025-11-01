@@ -53,7 +53,7 @@ const HeroSection: React.FC = () => (
   </section>
 );
 
-const WhyRajPath: React.FC = () => {
+const WhySaumyaPath: React.FC = () => {
     const features = [
         {
             icon: <IndustryVettedIcon className="w-10 h-10 mx-auto mb-4 text-royal-blue" />,
@@ -74,7 +74,7 @@ const WhyRajPath: React.FC = () => {
 
     return (
         <section>
-            <SectionHeader title="Why Raj Path?" subtitle="We are committed to providing a holistic learning experience that prepares you for the future of work." />
+            <SectionHeader title="Why Saumya Path?" subtitle="We are committed to providing a holistic learning experience that prepares you for the future of work." />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
                     <Card key={index} className="p-8 text-center">
@@ -134,7 +134,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onEnroll, enrolledCourses, allCou
 
       <HeroSection />
       
-      <WhyRajPath />
+      <WhySaumyaPath />
       
       <OurServices />
 

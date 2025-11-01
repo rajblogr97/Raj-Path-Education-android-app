@@ -10,6 +10,16 @@ export interface QuizQuestion {
   correctAnswer: number;
 }
 
+export interface GeneratedQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number; // 0-indexed
+}
+
+export interface GeneratedQuiz {
+  questions: GeneratedQuestion[];
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -23,6 +33,7 @@ export interface Lesson {
   audioUrl?: string;
   quizContent?: QuizQuestion[];
   summary?: string;
+  generatedQuiz?: GeneratedQuiz | null;
 }
 
 export interface Course {

@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Course, Lesson, TTSVoice, AVAILABLE_VOICES } from '../types';
-import { LeftArrowIcon, SpeakerIcon, CertificateIcon, ChevronDownIcon, PdfIcon, LinkIcon, AnimatedCheckmarkIcon, NotesIcon, LanguageIcon, VideoCameraIcon, PlayCircleIcon, SparklesIcon } from './IconComponents';
+import { Course, Lesson, TTSVoice, AVAILABLE_VOICES, GeneratedQuestion } from '../types';
+import { LeftArrowIcon, SpeakerIcon, CertificateIcon, ChevronDownIcon, PdfIcon, LinkIcon, AnimatedCheckmarkIcon, NotesIcon, LanguageIcon, VideoCameraIcon, PlayCircleIcon, SparklesIcon, TestIcon } from './IconComponents';
 import Card from './Card';
-import { generateSpeech, generateLessonSummary } from '../services/geminiService';
+import { generateSpeech, generateLessonSummary, generateQuizForLesson } from '../services/geminiService';
 import { decode, decodeAudioData } from '../utils/audioUtils';
 
 
@@ -71,6 +71,13 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
   const audioContextRef = useRef<AudioContext | null>(null);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<Record<string, boolean>>({});
   const [summaryError, setSummaryError] = useState<Record<string, string | null>>({});
+
+  // State for AI Quiz
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState<Record<string, boolean>>({});
+  const [quizError, setQuizError] = useState<Record<string, string | null>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<string, number | null>>({}); // key: `${lessonId}-${questionIndex}`
+  const [quizResults, setQuizResults] = useState<Record<string, { score: number; total: number } | null>>({});
+
 
   // Effect to clean up the audio context on component unmount
   useEffect(() => {
@@ -201,6 +208,52 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
         setIsGeneratingSummary(prev => ({ ...prev, [lessonId]: false }));
     }
   };
+  
+  const handleGenerateQuiz = async (lessonId: string) => {
+    if (!course?.lessons) return;
+    const lesson = course.lessons.find(l => l.id === lessonId);
+    if (!lesson || !lesson.description) return;
+
+    setIsGeneratingQuiz(prev => ({ ...prev, [lessonId]: true }));
+    setQuizError(prev => ({ ...prev, [lessonId]: null }));
+
+    try {
+        const quiz = await generateQuizForLesson(lesson.title, lesson.description);
+        const updatedLessons = course.lessons.map(l => 
+            l.id === lessonId ? { ...l, generatedQuiz: quiz } : l
+        );
+        setCourse(prev => prev ? { ...prev, lessons: updatedLessons } : null);
+    } catch (error: any) {
+        setQuizError(prev => ({ ...prev, [lessonId]: error.message || "Failed to generate quiz."}));
+    } finally {
+        setIsGeneratingQuiz(prev => ({ ...prev, [lessonId]: false }));
+    }
+  };
+
+  const handleAnswerSelect = (lessonId: string, questionIndex: number, optionIndex: number) => {
+      const key = `${lessonId}-${questionIndex}`;
+      setUserAnswers(prev => ({ ...prev, [key]: optionIndex }));
+      if (quizResults[lessonId]) {
+          setQuizResults(prev => ({ ...prev, [lessonId]: null }));
+      }
+  };
+
+  const handleCheckQuiz = (lessonId: string) => {
+      if (!course?.lessons) return;
+      const lesson = course.lessons.find(l => l.id === lessonId);
+      if (!lesson?.generatedQuiz) return;
+      
+      let score = 0;
+      lesson.generatedQuiz.questions.forEach((q, index) => {
+          const key = `${lessonId}-${index}`;
+          const userAnswer = userAnswers[key];
+          if (userAnswer !== undefined && userAnswer === q.correctAnswer) {
+              score++;
+          }
+      });
+
+      setQuizResults(prev => ({ ...prev, [lessonId]: { score, total: lesson.generatedQuiz!.questions.length } }));
+  };
 
   const completionPercentage = useMemo(() => {
     if (!course?.lessons || course.lessons.length === 0) return 0;
@@ -214,7 +267,7 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
         setAllCourses(updatedCourses);
     }
     return percentage;
-  }, [course]);
+  }, [course, allCourses, setAllCourses]);
 
   if (!course) {
     return (
@@ -237,6 +290,29 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
     }
     return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${style}`}>{text}</span>
   }
+
+  const renderQuizOptionClasses = (lessonId: string, q: GeneratedQuestion, qIndex: number, oIndex: number): string => {
+        const baseClasses = "w-full text-left p-2 border rounded-md transition-colors";
+        const userAnswerKey = `${lessonId}-${qIndex}`;
+        const userAnswer = userAnswers[userAnswerKey];
+
+        if (quizResults[lessonId]) { // Results are being shown
+            if (oIndex === q.correctAnswer) {
+                return `${baseClasses} bg-green-200 border-green-400`; // Correct answer
+            }
+            if (userAnswer === oIndex && userAnswer !== q.correctAnswer) {
+                return `${baseClasses} bg-red-200 border-red-400`; // Incorrectly selected answer
+            }
+            return `${baseClasses} bg-gray-100 border-gray-300 text-gray-500`; // Other options
+        }
+
+        // Not showing results yet
+        if (userAnswer === oIndex) {
+            return `${baseClasses} bg-blue-200 border-blue-400`; // Selected answer
+        }
+        return `${baseClasses} hover:bg-slate-100 border-gray-300`;
+    };
+
 
   return (
     <div className="space-y-6">
@@ -336,7 +412,7 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
                                         )}
 
                                         {/* AI Summary Section */}
-                                        {course.id === 1 && (
+                                        {lesson.description && (
                                             <div className="pt-4 mt-4 border-t border-slate-200">
                                                 {lesson.summary ? (
                                                     <div>
@@ -370,68 +446,111 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
                                             </div>
                                         )}
 
+                                        {/* AI Quiz Section */}
+                                        {lesson.description && (
+                                            <div className="pt-4 mt-4 border-t border-slate-200">
+                                                <h4 className="text-sm font-semibold mb-2 text-royal-blue flex items-center gap-2">
+                                                    <TestIcon className="w-4 h-4 text-purple-500" /> AI Practice Quiz
+                                                </h4>
+                                                {lesson.generatedQuiz ? (
+                                                    <div className="space-y-4">
+                                                        {quizResults[lesson.id] && (
+                                                            <div className={`p-3 rounded-lg text-center ${quizResults[lesson.id]!.score / quizResults[lesson.id]!.total >= 0.7 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                                <h5 className="font-bold">Quiz Result: {quizResults[lesson.id]!.score} / {quizResults[lesson.id]!.total}</h5>
+                                                                <p className="text-sm">{quizResults[lesson.id]!.score / quizResults[lesson.id]!.total >= 0.7 ? 'Great job!' : 'Keep practicing!'}</p>
+                                                            </div>
+                                                        )}
+                                                        {lesson.generatedQuiz.questions.map((q, qIndex) => (
+                                                            <div key={qIndex} className="text-sm">
+                                                                <p className="font-semibold mb-2">{qIndex + 1}. {q.question}</p>
+                                                                <div className="space-y-2">
+                                                                    {q.options.map((option, oIndex) => (
+                                                                        <button 
+                                                                            key={oIndex}
+                                                                            onClick={() => handleAnswerSelect(lesson.id, qIndex, oIndex)}
+                                                                            className={renderQuizOptionClasses(lesson.id, q, qIndex, oIndex)}
+                                                                            disabled={!!quizResults[lesson.id]}
+                                                                        >
+                                                                            {option}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        <button 
+                                                            onClick={() => handleCheckQuiz(lesson.id)}
+                                                            disabled={!!quizResults[lesson.id]}
+                                                            className="w-full bg-royal-blue text-white font-semibold py-2 rounded-lg mt-4 hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">
+                                                            Check Answers
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        <button 
+                                                            onClick={() => handleGenerateQuiz(lesson.id)}
+                                                            disabled={isGeneratingQuiz[lesson.id]}
+                                                            className="w-full flex items-center justify-center gap-2 bg-purple-100 text-purple-800 font-semibold py-2 px-3 rounded-lg hover:bg-purple-200 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                                        >
+                                                            {isGeneratingQuiz[lesson.id] ? (
+                                                                <>
+                                                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                                    <span>Generating Quiz...</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <SparklesIcon className="w-5 h-5" />
+                                                                    <span>Generate Practice Quiz</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                        {quizError[lesson.id] && <p className="text-red-500 text-xs mt-2 text-center">{quizError[lesson.id]}</p>}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        
                                         {lesson.videoUrl && (
-                                            <div>
-                                                <h4 className="text-sm font-semibold mb-2 text-gray-600">Video Lesson:</h4>
-                                                <video controls src={lesson.videoUrl} onPlay={handlePlay} className="w-full rounded-lg bg-black"></video>
+                                            <div className="pt-4 mt-4 border-t border-slate-200">
+                                                <video controls onPlay={handlePlay} className="w-full rounded-lg">
+                                                    <source src={lesson.videoUrl} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
                                             </div>
                                         )}
                                         {lesson.audioUrl && (
-                                            <div>
-                                                <h4 className="text-sm font-semibold mb-2 text-gray-600">Audio Lesson:</h4>
-                                                <audio controls src={lesson.audioUrl} onPlay={handlePlay} className="w-full"></audio>
+                                             <div className="pt-4 mt-4 border-t border-slate-200">
+                                                <audio controls onPlay={handlePlay} className="w-full">
+                                                    <source src={lesson.audioUrl} type="audio/ogg" />
+                                                    Your browser does not support the audio tag.
+                                                </audio>
                                             </div>
                                         )}
                                         {lesson.resources && lesson.resources.length > 0 && (
-                                            <div>
-                                                <h4 className="text-sm font-semibold mb-2 text-gray-600">Resources:</h4>
+                                            <div className="pt-4 mt-4 border-t border-slate-200">
+                                                <h4 className="text-sm font-semibold mb-2">Resources</h4>
                                                 <ul className="space-y-2">
-                                                    {lesson.resources.map((resource, index) => (
-                                                        <li key={index}>
-                                                            <a href={resource.url} target="_blank" rel="noopener noreferrer" className="flex items-center text-royal-blue hover:underline text-sm group">
-                                                                {resource.type === 'pdf' ? <PdfIcon className="w-5 h-5 mr-2 text-red-500" /> : <LinkIcon className="w-5 h-5 mr-2 text-blue-500" />}
-                                                                <span>{resource.title}</span>
-                                                            </a>
+                                                    {lesson.resources.map((res, index) => (
+                                                        <li key={index} className="flex items-center text-sm">
+                                                            {res.type === 'pdf' ? <PdfIcon className="w-5 h-5 mr-2 text-red-500" /> : <LinkIcon className="w-5 h-5 mr-2 text-blue-500" />}
+                                                            <a href={res.url} target="_blank" rel="noopener noreferrer" className="text-royal-blue hover:underline">{res.title}</a>
                                                         </li>
                                                     ))}
                                                 </ul>
                                             </div>
                                         )}
-                                        {lesson.type === 'quiz' && lesson.quizContent && (
-                                            <div>
-                                                <h4 className="text-sm font-semibold my-2 text-gray-600">Quiz:</h4>
-                                                <div className="space-y-4">
-                                                    {lesson.quizContent.map((q, index) => (
-                                                        <div key={index} className="bg-white p-4 rounded-md border">
-                                                            <p className="font-semibold">{index + 1}. {q.question}</p>
-                                                            <div className="mt-2 space-y-2">
-                                                                {q.options.map((option, optIndex) => (
-                                                                    <div key={optIndex} className="flex items-center">
-                                                                        <input type="radio" name={`question-${index}`} id={`q-${index}-opt-${optIndex}`} className="h-4 w-4 text-royal-blue focus:ring-royal-blue border-gray-300" />
-                                                                        <label htmlFor={`q-${index}-opt-${optIndex}`} className="ml-3 block text-sm text-gray-700">{option}</label>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h4 className="text-sm font-semibold text-gray-600 flex items-center">
-                                                    <NotesIcon className="w-5 h-5 mr-2 text-gray-400" />
-                                                    Personal Notes
-                                                </h4>
-                                                {saveStatus === 'saving' && <span className="text-xs text-gray-500 italic">Saving...</span>}
-                                                {saveStatus === 'saved' && <span className="text-xs text-green-600">Saved!</span>}
-                                            </div>
-                                            <textarea
-                                                className="w-full h-24 p-2 border rounded-md text-sm focus:ring-1 focus:ring-royal-blue focus:outline-none transition"
-                                                placeholder="Add your personal notes here..."
-                                                value={lesson.notes || ''}
+                                        
+                                        <div className="pt-4 mt-4 border-t border-slate-200">
+                                            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><NotesIcon className="w-4 h-4" /> My Notes</h4>
+                                            <textarea 
+                                                value={lesson.notes}
                                                 onChange={(e) => handleNoteChange(lesson.id, e.target.value)}
+                                                placeholder="Add your personal notes for this lesson here..."
+                                                className="w-full h-24 p-2 text-sm border rounded-md focus:ring-1 focus:ring-royal-blue focus:outline-none transition"
                                             />
+                                             <p className="text-xs text-right text-gray-400 h-4 mt-1">
+                                                {saveStatus === 'saving' && 'Saving...'}
+                                                {saveStatus === 'saved' && 'Saved!'}
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -440,29 +559,34 @@ const CourseDetail: React.FC<CourseDetailProps> = ({ allCourses, setAllCourses }
                     </ul>
                 </Card>
             </div>
-            <div>
-                 <Card className="p-6">
-                     <div className="flex items-center mb-4">
-                        <CertificateIcon className="w-8 h-8 text-gold-accent mr-3"/>
-                        <h2 className="text-xl font-bold text-royal-blue">Certificate</h2>
-                     </div>
-                     <p className="text-gray-600 mb-4">Complete the course to earn your certificate and share your achievement.</p>
-                     {completionPercentage >= 100 ? (
-                        <Link
-                            to={`/certificate/${course.id}`}
-                            className="w-full block text-center bg-gold-accent text-royal-blue font-bold py-2 rounded-lg hover:opacity-90 transition-opacity"
-                        >
-                            View Certificate
-                        </Link>
-                    ) : (
-                        <button 
-                            disabled
-                            className="w-full bg-gold-accent text-royal-blue font-bold py-2 rounded-lg transition-opacity opacity-50 cursor-not-allowed"
-                        >
-                           {`Complete to Unlock (${Math.round(completionPercentage)}%)`}
-                        </button>
+            <div className="lg:col-span-1">
+                <Card className="p-6 sticky top-24">
+                    <h2 className="text-xl font-bold text-royal-blue mb-4">Course Info</h2>
+                    <ul className="space-y-3 text-sm">
+                       {course.instructor && <li className="flex items-center"><strong className="w-24 font-semibold">Instructor:</strong> <span className="text-gray-700">{course.instructor}</span></li>}
+                       {course.level && <li className="flex items-center"><strong className="w-24 font-semibold">Level:</strong> <span className="text-gray-700">{course.level}</span></li>}
+                       {course.duration && <li className="flex items-center"><strong className="w-24 font-semibold">Duration:</strong> <span className="text-gray-700">{course.duration}</span></li>}
+                       {course.language && <li className="flex items-center"><strong className="w-24 font-semibold">Language:</strong> <span className="text-gray-700">{course.language}</span></li>}
+                       {course.prerequisites && course.prerequisites.length > 0 && (
+                          <li className="flex items-start">
+                            <strong className="w-24 font-semibold flex-shrink-0">Prerequisites:</strong> 
+                            <span className="text-gray-700">{course.prerequisites.join(', ')}</span>
+                          </li>
+                       )}
+                    </ul>
+                    {completionPercentage === 100 && (
+                        <div className="mt-6 pt-6 border-t border-slate-200">
+                            <h3 className="font-bold text-green-600">Congratulations!</h3>
+                            <p className="text-sm text-gray-600 mb-4">You have completed this course.</p>
+                            <Link to={`/certificate/${course.id}`}>
+                                <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-gold-accent to-yellow-300 text-royal-blue font-bold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity">
+                                    <CertificateIcon className="w-5 h-5"/>
+                                    Get Certificate
+                                </button>
+                            </Link>
+                        </div>
                     )}
-                 </Card>
+                </Card>
             </div>
         </div>
     </div>

@@ -34,9 +34,9 @@ const Certificate: React.FC<CertificateProps> = ({ userName, courseTitle, comple
 
         <div className="mt-16 flex justify-between items-end w-full max-w-lg mx-auto">
           <div className="text-center">
-            <p className="text-xl font-bold text-royal-blue" style={{ fontFamily: "'Brush Script MT', cursive" }}>Raj Meena</p>
+            <p className="text-xl font-bold text-royal-blue" style={{ fontFamily: "'Brush Script MT', cursive" }}>Saumya Meena</p>
             <hr className="border-gray-600 mt-1" />
-            <p className="text-sm font-semibold text-gray-600">Founder, Raj Path</p>
+            <p className="text-sm font-semibold text-gray-600">Founder, Saumya Path</p>
           </div>
           <div className="text-center">
              <p className="text-xl font-bold text-royal-blue" style={{ fontFamily: "'Brush Script MT', cursive" }}>Dr. Evelyn Reed</p>

@@ -64,9 +64,9 @@ const LoginPage: React.FC = () => {
 
         <div className="mt-4 text-xs text-center text-gray-500 bg-slate-50 p-3 rounded-lg">
           <p className="font-semibold">Demo Accounts (password: 'password')</p>
-          <p><strong className="text-royal-blue">Student:</strong> student@rajpath.com</p>
-          <p><strong className="text-royal-blue">Instructor:</strong> instructor@rajpath.com</p>
-          <p><strong className="text-royal-blue">Admin:</strong> admin@rajpath.com</p>
+          <p><strong className="text-royal-blue">Student:</strong> student@saumyapath.com</p>
+          <p><strong className="text-royal-blue">Instructor:</strong> instructor@saumyapath.com</p>
+          <p><strong className="text-royal-blue">Admin:</strong> admin@saumyapath.com</p>
         </div>
 
         <p className="text-center text-sm text-gray-600 mt-6">

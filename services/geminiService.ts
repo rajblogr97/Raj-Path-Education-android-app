@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { RoadmapStep, Opportunity, Citation, TTSVoice, AnalyticsData, ATSAnalysisResult } from '../types';
+import { RoadmapStep, Opportunity, Citation, TTSVoice, AnalyticsData, ATSAnalysisResult, GeneratedQuiz } from '../types';
 
 const API_KEY = process.env.API_KEY;
 
@@ -155,7 +155,7 @@ export const generateLessonSummary = async (lessonTitle: string, lessonDescripti
 export const getAnalyticsInsights = async (query: string, data: AnalyticsData): Promise<string> => {
     try {
         const prompt = `
-            You are a senior data analyst for an educational platform called Raj Path.
+            You are a senior data analyst for an educational platform called Saumya Path.
             Analyze the following JSON data to answer the user's query.
             Provide a clear, concise, and helpful answer based ONLY on the data provided.
             Format your response in readable Markdown.
@@ -248,5 +248,62 @@ export const analyzeResumeWithATS = async (resumeText: string, jobDescription: s
     } catch (error) {
         console.error("Error analyzing resume:", error);
         throw new Error("Failed to analyze resume. The AI may be experiencing high traffic or the provided text is too long. Please try again with a concise resume and job description.");
+    }
+};
+
+const quizSchema = {
+    type: Type.OBJECT,
+    properties: {
+        questions: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    question: {
+                        type: Type.STRING,
+                        description: "The question text.",
+                    },
+                    options: {
+                        type: Type.ARRAY,
+                        items: { type: Type.STRING },
+                        description: "An array of 4 multiple-choice options.",
+                    },
+                    correctAnswer: {
+                        type: Type.INTEGER,
+                        description: "The 0-indexed integer of the correct answer in the options array.",
+                    },
+                },
+                required: ["question", "options", "correctAnswer"],
+            },
+        },
+    },
+    required: ["questions"],
+};
+
+export const generateQuizForLesson = async (lessonTitle: string, lessonDescription: string): Promise<GeneratedQuiz> => {
+    try {
+        const prompt = `
+            Based on the following lesson content, create a short multiple-choice quiz with exactly 3 questions to test a user's understanding.
+            Each question must have 4 options.
+
+            Lesson Title: "${lessonTitle}"
+            Lesson Description: "${lessonDescription}"
+
+            Return the quiz in the specified JSON format.
+        `;
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: quizSchema,
+            },
+        });
+
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText) as GeneratedQuiz;
+    } catch (error) {
+        console.error("Error generating quiz:", error);
+        throw new Error("Failed to generate quiz. The AI may be busy. Please try again.");
     }
 };

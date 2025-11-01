@@ -24,8 +24,7 @@ import CourseForm from './components/CourseForm';
 import CertificatePage from './pages/CertificatePage';
 import InstructorsPage from './pages/InstructorsPage';
 import ATSCheckerPage from './pages/ATSCheckerPage';
-import SuccessSharePage from './pages/SuccessSharePage';
-import HostingPage from './pages/HostingPage';
+import AppSizePage from './pages/AppSizePage';
 
 const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -176,15 +175,9 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
 
-            <Route path="/share/:courseId" element={
+            <Route path="/app-size" element={
               <ProtectedRoute allowedRoles={['Student', 'Instructor', 'Admin']}>
-                <SuccessSharePage allCourses={allCourses} />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/hosting" element={
-              <ProtectedRoute allowedRoles={['Student', 'Instructor', 'Admin']}>
-                <HostingPage />
+                <AppSizePage />
               </ProtectedRoute>
             } />
 

@@ -1,7 +1,5 @@
 {
-  "name": "Copy of Copy of Raj Path",
+  "name": "Saumya Path",
   "description": "An AI-driven educational platform that provides both technical and non-technical learning resources across all career sectors. It empowers users to learn, grow, and build successful careers with a personalized career roadmap.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "requestFramePermissions": []
 }

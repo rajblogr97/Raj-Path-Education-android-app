@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { DashboardIcon, CoursesIcon, LeftArrowIcon, RightArrowIcon, AnalyticsIcon, DocumentSearchIcon, CloudIcon } from './IconComponents';
+import { DashboardIcon, CoursesIcon, LeftArrowIcon, RightArrowIcon, AnalyticsIcon, DocumentSearchIcon } from './IconComponents';
 import { useAuth } from '../context/AuthContext';
 
 interface SidebarProps {
@@ -27,18 +27,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const { user } = useAuth();
 
   const getNavItems = () => {
-    const hostingGuideItem = { to: "/hosting", icon: <CloudIcon className="w-6 h-6" />, label: 'Hosting Guide' };
-    
     switch(user?.role) {
       case 'Admin':
         return [
            { to: "/analytics", icon: <AnalyticsIcon className="w-6 h-6" />, label: 'Admin Analytics' },
-           hostingGuideItem,
         ];
       case 'Instructor':
         return [
            { to: "/instructor-dashboard", icon: <DashboardIcon className="w-6 h-6" />, label: 'Instructor Dashboard' },
-           hostingGuideItem,
         ];
       case 'Student':
       default:
@@ -46,7 +42,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             { to: "/", icon: <DashboardIcon className="w-6 h-6" />, label: 'Dashboard' },
             { to: "/my-courses", icon: <CoursesIcon className="w-6 h-6" />, label: 'My Courses' },
             { to: "/ats-checker", icon: <DocumentSearchIcon className="w-6 h-6" />, label: 'ATS Resume Checker' },
-            hostingGuideItem,
         ];
     }
   }
@@ -54,7 +49,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   return (
     <div className={`fixed top-0 left-0 h-full bg-royal-blue text-white flex flex-col transition-all duration-300 ease-in-out z-40 ${isOpen ? 'w-64' : 'w-20'}`}>
       <div className="flex items-center justify-between p-4 h-16 border-b border-white/20">
-        {isOpen && <h1 className="text-2xl font-bold bg-gradient-to-r from-gold-accent to-yellow-300 text-transparent bg-clip-text whitespace-nowrap">Raj Path</h1>}
+        {isOpen && (
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gold-accent to-yellow-300 text-transparent bg-clip-text whitespace-nowrap">Saumya Path</h1>
+            <div className="flex items-center w-full mt-1">
+              <div className="h-px flex-grow bg-gradient-to-r from-transparent via-gold-accent/50 to-gold-accent"></div>
+              <div className="w-2 h-2 rotate-45 bg-gold-accent"></div>
+              <div className="h-px flex-grow bg-gradient-to-l from-transparent via-gold-accent/50 to-gold-accent"></div>
+            </div>
+          </div>
+        )}
         <button onClick={() => setIsOpen(!isOpen)} className="p-1 rounded-full hover:bg-white/20">
             {isOpen ? <LeftArrowIcon className="w-6 h-6" /> : <RightArrowIcon className="w-6 h-6" />}
         </button>

@@ -12,7 +12,7 @@ const SectionHeader: React.FC<{ title: string; subtitle?: string }> = ({ title, 
 
 const Testimonials: React.FC = () => (
     <section>
-        <SectionHeader title="Success Stories from Our Learners" subtitle="Hear from our alumni who have transformed their careers with Raj Path." />
+        <SectionHeader title="Success Stories from Our Learners" subtitle="Hear from our alumni who have transformed their careers with Saumya Path." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {TESTIMONIALS.map((testimonial, index) => (
                 <Card key={index} className="p-6 flex flex-col">

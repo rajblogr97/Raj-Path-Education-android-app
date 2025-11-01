@@ -3,7 +3,6 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { Course } from '../types';
 import { useAuth } from '../context/AuthContext';
 import Certificate from '../components/Certificate';
-import { LinkedInIcon } from '../components/IconComponents';
 
 interface CertificatePageProps {
   allCourses: Course[];
@@ -37,22 +36,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ allCourses }) => {
               })}
           />
       </div>
-      <div className="mt-8 flex flex-wrap justify-center items-center gap-4 print:hidden">
-          <Link 
-            to={`/share/${course.id}`}
-            className="flex items-center gap-2 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <LinkedInIcon className="w-5 h-5" />
-            Share on LinkedIn
-          </Link>
-          <button 
-            onClick={handlePrint}
-            className="bg-royal-blue text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-colors"
-          >
-            Print or Save as PDF
-          </button>
-      </div>
-       <div className="mt-4 text-center print:hidden">
+      <div className="mt-8 text-center print:hidden">
+        <button 
+          onClick={handlePrint}
+          className="bg-royal-blue text-white font-bold py-3 px-8 rounded-lg hover:bg-opacity-90 transition-colors mr-4"
+        >
+          Print or Save as PDF
+        </button>
         <Link 
           to={`/course/${course.id}`}
           className="text-royal-blue font-semibold hover:underline"
